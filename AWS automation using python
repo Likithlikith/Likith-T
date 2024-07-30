@@ -1,0 +1,72 @@
+
+import boto3
+region_details=[]
+client=boto3.client('ec2',aws_access_key_id='AKIAUZDQ6V7P2PZ6ANPD',aws_secret_access_key='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',region_name='ap-south-1')
+#print(dir(client))
+capt_reg=client.describe_regions()
+reg_comp_det=(capt_reg['Regions'])
+for reg in reg_comp_det:
+    region_details.append(reg['RegionName'])
+print("below are the details avaliable in aws \n {0}".format('\n'.join(region_details)))
+
+reg_in=input("enter the region to fetch\n")
+ava=client.describe_availability_zones(Filters=[{'Name': 'group-name','Values':[reg_in,]},])
+print(ava['AvailabilityZones'])
+for avaz in ava['AvailabilityZones']:
+    print("below are details of availability zones {0} in the regions {1}".format(avaz['ZoneId'],reg_in))
+    print(avaz['ZoneId'])
+    print(avaz['ZoneName'])
+    print("=======================")
+
+ec2call=client.describe_instances()
+# print(ec2call)
+ec2_comp_details=ec2call['Reservations']
+print(len(ec2_comp_details))
+for insta in ec2_comp_details:
+    instanceid=insta['Instances'][0]['InstanceId']
+    state=insta['Instances'][0]['State']['Name']
+    dnsname=insta['Instances'][0]['PublicDnsName']
+    privateip=insta['Instances'][0]['PrivateIpAddress']
+    ava_zone=insta['Instances'][0]['Placement']['AvailabilityZone']
+    print("below are the details of instances {0}\n instanceis:{0}\nstate:{1}\ndnsname:{2}\nprivateip:{3}\nava_zone:{4}\n".format(instanceid,state,dnsname,privateip,ava_zone))
+    print("==============================")
+
+
+usr_ava=input("enter the availability zone\n")
+
+instance_details=[]
+running=[]
+stopped=[]
+for insta in ec2_comp_details:
+    instanceid=insta['Instances'][0]['InstanceId']
+    state=insta['Instances'][0]['State']['Name']
+    dnsname=insta['Instances'][0]['PublicDnsName']
+    privateip=insta['Instances'][0]['PrivateIpAddress']
+    ava_zone=insta['Instances'][0]['Placement']['AvailabilityZone']
+    print("below are the details of instances {0}\n instanceis:{0}\nstate:{1}\ndnsname:{2}\nprivateip:{3}\nava_zone:{4}\n".format(instanceid, state, dnsname, privateip, ava_zone))
+    instance_details.append(instanceid)
+    if(state == "running"):
+        print("state is {0}\n instanceid={1}".format(state,instanceid))
+        running.append(instanceid)
+    elif(state == "stopped"):
+        stopped.append(stopped)
+    print("==========================")
+
+opt=input("enter '1' to display all instance id \n '2' to display running instance\n'3' to display stopped instance id\n'4' to start instances \n'5' stop all instances\n '6' to stop running instances")
+
+if(opt == "1"):
+    print("below are the details of all instances {0}".format(instance_details))
+elif(opt == "2"):
+    print("below are the details of running instances {0}".format(running))
+elif(opt =="3"):
+    print("below are the details of stopped instances {0}".format(stopped))
+elif(opt == "4"):
+    print("staring all instances")
+    client.start_instances(InstancesIds=instance_details)
+
+elif(opt == "5"):
+    print("stopping all instances")
+    client.stop_instances(InstancesIds=instance_details)
+elif(opt == "6"):
+    print("stopping running instances")
+    client.stop_instances(InstancesId=running)
