@@ -1,0 +1,60 @@
+import boto3
+s3call = boto3.client('s3',aws_access_key_id='AKIAXYKJTXACMU7SA5V5',aws_secret_access_key='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',region_name='ap-south-1')
+#print(dir(s3call))
+bucketexists=[]
+bucketlist=s3call.list_buckets()
+bucket_Details=(bucketlist['Buckets'])
+count_of_buck=len(bucketlist)
+for buc_ran in range(0,count_of_buck,1):
+    print(bucket_Details[buc_ran])
+    bucketexists.append(bucket_Details[buc_ran]['Name'])
+
+print("below are the available in account\n{0}".format('\n'.join(bucketexists)))
+usr_inp_buck=input("enter the bucket to search\n")
+if (usr_inp_buck in bucketexists):
+    print("bucket {0} exists".format(usr_inp_buck))
+    s3objectcall=s3call.list_objects(Bucket=usr_inp_buck)
+    print(s3objectcall)
+    if "Contents" in s3objectcall:
+        s3objectlist=s3objectcall['Contents']
+        count_of_object=len(s3objectlist)
+        for obj_ran in range(0,count_of_object,1):
+            name_of_object=s3objectlist[obj_ran]['Key']
+            size_of_object=s3objectlist[obj_ran]['Size']
+            print("below are details of object {0} in buckets{1}\nname={0}\nsize={2}".format(name_of_object,usr_inp_buck,size_of_object))
+    else:
+        print("no objects avaiable in buckets {0} and its is empty buckets".format(s3objectcall))
+else:
+    print("bucket {0} does not exists".format(usr_inp_buck))
+    #create_bucket=s3call.create_bucket(Bucket=usr_inp_buck,CreateBucketConfiguration={'LocationConstraint':'ap-south-1'})
+    #print (create_bucket)
+s3bucket_list_final=s3call.list_buckets()
+bucket_Details_final=s3bucket_list_final['Buckets']
+print("below are the buckets avaiable in account\n")
+for k in range(0,len(bucket_Details_final),1):
+    print(bucket_Details_final[k]['Name'])
+usrop=input("enter '1' to upload object\n'2' to download objects\n'3' to delete object")
+if (usrop == '1'):
+    objelist=[]
+    buck=input("enter the bucket name to upload\n")
+    s3file=input("enter the s3 file name\n")
+    localfilename=input("enter the local filename path\n")
+    uploadoperation=s3call.upload_file(localfilename,buck,s3file)
+    s3list_objects=s3call.list_objects(Bucket=buck)
+    list_objects=s3list_objects['Contents']
+    for obj_ran in range(0,len(list_objects),1):
+        objelist.append(list_objects[obj_ran]['Key'])
+    if s3file in objelist:
+        print("{0} file uploaded successfully in bucket {1}".format(s3file,buck))
+
+elif (usrop == '2'):
+    buck=input("Enter the bucket name from where u need to download\n")
+    s3list_objects=s3call.list_objects(Bucket=buck)
+    objectlisting=s3list_objects['Contents']
+    print("below are the objects are available in buckets{0}".format(buck))
+    for o in range(0,len(objectlisting),1):
+        print(objectlisting[o]['Key'])
+    s3filename=input("Enter thr filename from above list which need to be downloaded")
+    localfilnamepath=input("Enter the local file name path to download")
+    with open(localfilnamepath,'wb') as lb:
+        s3call.download_fileobj(buck,s3filename,lb)
