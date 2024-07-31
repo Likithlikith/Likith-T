@@ -17,8 +17,8 @@ print (float(freeram)/float(totalram))
 total_free_perce=(float(freeram)*100/float(totalram))
 print (total_free_perce)
 if (total_free_perce < 90):
-        print( "Memory utilization thresho;ld and below are process consuming most of memory")
+        print( "Memory utilization threshold and below are process consuming most of memory")
         cmd_mum="pa axo %mem,user,pid,command|sort -k1 -nr | head -10"
         print (subprocess.Popen(cmd_mum,stdout=subprocess.PIPE,shell=True).communicate()[0])
 else:
-        print ("memeory utilization nelow thereshold no issue")
+        print ("memory utilization below thereshold no issue")
