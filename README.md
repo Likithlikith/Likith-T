@@ -1,2 +1,0 @@
-# Likith-T
-my projects
