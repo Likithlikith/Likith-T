@@ -1,0 +1,45 @@
+#!/usr/bin/python
+import subprocess
+import re
+usrinp=raw_input("enter '1' to know the instrallation date\n'2' to check paritcular present  or not \n'3' would like to find how many times praricular user logged in till now\n'4'would  to like to display ram details\n'5'to display inly swap details")
+if (usrinp == "1"):
+
+        cmd="last"
+        last_exe=subprocess.Popen(cmd,stdout=subprocess.PIPE,shell=True).communicate ()[0]
+        final_last=last_exe.strip().split('n')
+        for opi in final_last:
+                if "wtmp" in opi:
+                        print ("below are the installation date of server\n {0}".format(opi))
+elif (usrinp == '2'):
+        usrname=raw_input("enter the username\n")
+        usr_com=re.compile(r'^{0}'.format(usrname))
+        exact_us=re.compile(r'^{0}$'.format(usrname))
+        file_open=open('/etc/passwd','r')
+        for mk in file_open:
+                if re.search(usr_com,mk):
+                        splitted_out=mk.split(':')
+                        home=splitted_out[-2]
+                        shell_user=splitted_out[-1]
+                        if re.search(exact_us,splitted_out[0]):
+                                print ("below are th edetails of user {0}\nusername={0}\nhome directory={1}\nshell ={2}\n".format(usrname,home,shell_user))
+                        cmd_ch="chage -l {0}".format(usrname)
+                        print (subprocess.Popen(cmd_ch,stdout=subprocess.PIPE,shell=True).communicate()[0])
+
+elif (usrinp == "3"):
+        usrname=raw_input("enter the username\n")
+        cmd_usr="last {0}".format(usrname)
+        out_cmd_usr=subprocess.Popen(cmd_usr,stdout=subprocess.PIPE,shell=True).communicate()[0].split('\n')
+        extra_usr=out_cmd_usr[0:-1]
+        print("Number of times user {0} logged in till noe from the date of installation is {1}".format(usrname,len(extra_usr)))
+
+elif (usrinp == '4'):
+        cmd_free="free"
+        out_free=subprocess.Popen(cmd_free,stdout=subprocess.PIPE,shell=True).communicate()[0].split('\n')
+        ramdetails=out_free[1]
+        print ("below are the ram details of server\n{0}".format(ramdetails))
+
+elif (usrinp == "5"):
+        cmd_free="free"
+        out_free=subprocess.Popen(cmd_free,stdout=subprocess.PIPE,shell=True).communicate()[0].split('\n')
+        swapdetails=out_free[-2]
+        print ("below are the swap details of server\n{0}".format(swapdetails))
